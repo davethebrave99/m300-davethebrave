@@ -3,6 +3,7 @@
 ### This is Header 3
 ###### This is Header 6 - but does it look alright?
 
+
 * hi
 * bye
 * now
@@ -35,3 +36,28 @@
 > > This is nested blockquote.
 >
 > Back to the first level.
+
+This is a short test to see how plain text is displayed on github.
+
+```
+Hello this is a code test
+```
+
+```javascript
+var s = "Javascript syntax highlighting";
+alert(s);
+```
+
+This is a simple imported picture
+
+![link profile picture](./images/link_profile.jpg "Title")
+
+<br><br><br>
+
+And this is the same picture but its size is reduced. This is done by specifying the size at the end of the line where the picture is included.
+
+![link profile picture reduced](./images/link_profile.jpg =250x)
+
+
+
+<h1>This is a usual html header. Apparently you can use html tags in md files</h1>
