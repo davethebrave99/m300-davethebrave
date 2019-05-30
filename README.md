@@ -4,7 +4,7 @@ In dieser Dokumentation weise ich die einzelnen Kompetenzen für die verschieden
 
 ## Inhaltsverzeichnis
 
-* 01 - [K1](#k1-)
+* 01 - [K1](#k1)
 * K2 - [Lernumgebung einrichten](#k2-)
 * K3 - [Vagrant Vertiefung](#k3-)
 * K4 - [Sicherheit implementieren](#k4-)
