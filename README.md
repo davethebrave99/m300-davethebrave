@@ -13,10 +13,24 @@ In dieser Dokumentation weise ich die einzelnen Kompetenzen für die verschieden
 ## Toolumgebung aufsetzen <a name="k1"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)
 
-
+Keine notwendigen Schritte, welche man dokumentieren hätte müssen
 
 ## Lernumgebung einrichten <a name="k2"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)
+
+### GitHub Account einrichten
+
+
+### Mit Git Repository pushen (Git Client wurde verwendet)
+
+1. Als erstes geht man in den Master des Repositories
+
+2. Danach fügt man den neuen Content mit dem folgenden Befehl hinzu
+
+3. Als nächstes führt man einen Commit aus und gibt an, was geändert wurde (siehe Screenshot weiter unten)
+
+4. Zu guter letzt pusht man das Repository in die Cloud (Git)
+
 
 
 ## Vagrant Vertiefung <a name="k3"></a>
@@ -108,47 +122,7 @@ Dieses File modifizieren wir noch mit den folgenden Zeilen
 
 ### Netzwerkplan
 
-    +-------------------------------------------------------------------------------------------------------------------------------------------------+
-    | Netzwerk: 10.0.2.0/24                                                                                                                           |
-    |+---------------------------------------------------------------------------------------------+                                                  |
-    || Hostname: ch-web01                                                                          |                                                  |
-    || OS: Ubunt  16.04 LTS                                                                        |                                                  |
-    ||                                                                                             |                                                  |
-    || LAN enp3s0: 10.0.2.15                                                                       |                                                  |
-    || Docker docker0: 172.17.0.1                                                                  |                                                  |
-    || Port: 80, 443, 8080, 8082                                                                   |                                                  |
-    || NAT: 32760-32780, 80, 8080, 8081, 8082, 3306,                                               |                                                  |
-    ||                                                                                             |                                                  |
-    ||+-----------------------------------------+      +-----------------------------------------+ |                                                  |
-    |||Jenkins Container                        |      | Apache Container                        | |                                                  |
-    |||Ports: 8080, 8082                        |      | Ports: 80, 443, 8081                    | |                                                  |
-    |||Version: 2.60.3                          |      | Version: 14.04                          | |                                                  |
-    |||Plugins: git-client, docker-engine       |      | Plugins: -                              | |                                                  |
-    |||                                         |      |                                         | |                                                  |
-    |||                                         |      |                                         | |                                                  |
-    ||+-----------------------------------------+   +-----------------------------------------+   +-----------------------------------------+ |       |
-    |+---------------------------------------------------------------------------------------------+|
-    +-----------------------------------------------------------------------------------------------+
 
-
-------------------------------------------------------------
-
-+-------------------------------------------------------------------+
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-|                                                                   |
-+-------------------------------------------------------------------+
 
 ### Testfälle
 ***
@@ -164,9 +138,14 @@ nr2
 ## Sicherheit implementieren <a name="k4"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+### Firewall Konfigurationen
+
+
+### Reverse Proxy
+
+
 
 ## Zusätzliche Bewertungspunkte <a name="k5"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+### Reflexion
