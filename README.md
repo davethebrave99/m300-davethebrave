@@ -1,4 +1,4 @@
-# Modul 300 - DIESDASANANAS
+# Modul 300 - Plattformübergreifende Dienste in ein Netzwerk integrieren
 
 In dieser Dokumentation weise ich die einzelnen Kompetenzen für die verschiedenen Lernbeurteilungen nach
 
