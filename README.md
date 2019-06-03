@@ -4,7 +4,7 @@ In dieser Dokumentation weise ich die einzelnen Kompetenzen für die verschieden
 
 ## Inhaltsverzeichnis
 
-* 01 - [Toolumgebung aufsetzen](#k1)
+* K1 - [Toolumgebung aufsetzen](#k1)
 * K2 - [Lernumgebung einrichten](#k2)
 * K3 - [Vagrant Vertiefung](#k3)
 * K4 - [Sicherheit implementieren](#k4)
@@ -18,19 +18,15 @@ Keine notwendigen Schritte, welche man dokumentieren hätte müssen
 ## Lernumgebung einrichten <a name="k2"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)
 
-### GitHub Account einrichten
-
-
 ### Mit Git Repository pushen (Git Client wurde verwendet)
 
 1. Als erstes geht man in den Master des Repositories
 
 2. Danach fügt man den neuen Content mit dem folgenden Befehl hinzu
 
-3. Als nächstes führt man einen Commit aus und gibt an, was geändert wurde (siehe Screenshot weiter unten)
+3. Als nächstes führt man einen Commit aus und gibt an, was geändert wurde
 
 4. Zu guter letzt pusht man das Repository in die Cloud (Git)
-
 
 
 ## Vagrant Vertiefung <a name="k3"></a>
@@ -170,6 +166,8 @@ end
 
 ### Netzwerkplan
 
+WICHTIG: Ubuntu Webserver konnte nicht hinzugefügt werden (Zeitgründe)
+
     +------------------------------------------------------------------------------------+   
     |NAT Netzwerk 10.0.2.0/24                                                            |   
     |                                                                                    |   
@@ -188,11 +186,44 @@ end
 ### Testfälle
 ***
 
-nr1
-vagrant ssh
-hostnamectl
+In diesem Abschnitt werden verschiedene Test-Cases durchgeführt.
+<br>
 
-nr2
+```
+vagrant ssh
+```
+<br>
+
+1. Wurde das richtige OS installiert?
+```
+hostnamectl --> Zeigt unter anderem installiertes OS an
+```
+
+2. Läuft der Webserver?
+```
+systemctl status httpd
+```
+
+3. Ist SELinux disabled?
+```
+sestatus --> Zeigt den Status von SELinux an
+```
+
+4. Läuft die Firewall? (CentOS)
+```
+systemctl status firewalld
+```
+
+5. Läuft die Firewall? (Ubuntu)
+```
+sudo ufw status
+```
+
+6. Wurden die Benutzer erstellt?
+```
+su [USERNAME]
+cat /etc/passwd --> Zeigt alle Benutzer im System
+```
 
 
 
@@ -201,10 +232,82 @@ nr2
 
 ### Firewall Konfigurationen
 
+#### CentOS
 
+1. Firewall aktivieren & enablen
+```
+systemctl start firewalld
+systemctl enable firewalld
+```
+
+2. Firewall Rules setzen
+```
+sudo firewall-cmd --permanent --add-port=22/tcp
+sudo firewall-cmd --permanent --add-port=22/udp
+sudo firewall-cmd --permanent --add-port=80
+sudo firewall-cmd --permanent --add-port=443
+```
+
+3. Firewall-Reload ausführen
+```
+sudo firewall-cmd --reload
+```
+
+#### Ubuntu
+
+```
+#activate firewall
+sudo apt-get install ufw -y
+yes | sudo ufw enable
+
+#set firewall rules
+sudo ufw deny out to any
+sudo ufw allow 22
+sudo ufw allow 80/tcp
+sudo ufw allow 80/udp
+sudo ufw allow 443/tcp
+sudo ufw allow 443/udp
+```
+
+<br>
 ### Reverse Proxy
 
+1. Notwendige Pakete installieren
+```
+sudo apt-get install libapache2-mod-proxy-html
+sudo apt-get install libxml2-dev
+```
 
+2. Plugins aktivieren
+```
+sudo a2enmod proxy
+sudo a2enmod proxy_html
+sudo a2enmod proxy_http
+```
+
+3. Die Datei /etc/apache2/apache2.conf ergänzen
+```
+web01ubuntu localhost 
+```
+
+4. Apache-Webserver neu starten:
+```
+sudo service apache2 restart
+```
+
+5. sites-enabled/001-reverseproxy.conf ergänzen
+```
+Allgemeine Proxy Einstellungen
+    ProxyRequests Off
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+
+     Weiterleitungen master
+    ProxyPass /master http://master
+    ProxyPassReverse /master http://master
+```
 
 ## Zusätzliche Bewertungspunkte <a name="k5"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)

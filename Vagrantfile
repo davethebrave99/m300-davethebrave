@@ -4,7 +4,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "web01" do |web01|
   web01.vm.box = "centos/7"
   web01.vm.hostname = "web01"
-  #web01.vm.network "private_network", ip: "10.0.2.1"
+  web01.vm.network "private_network", ip: "192.168.1.10"
     web01.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
     web01.vm.network "forwarded_port", guest:443, host:4343, auto_correct: true
     web01.vm.provider "virtualbox" do |vb|
@@ -40,7 +40,7 @@ Vagrant.configure("2") do |config|
 
   #configure ubuntu webserver
   config.vm.define "web01ubuntu" do |web01ubuntu|
-    web01ubuntu.vm.box = "ubuntu/trusty64"
+    web01ubuntu.vm.box = "ubuntu/xenial64"
     web01ubuntu.vm.hostname = "web01ubuntu"
     #web01.vm.network "private_network", ip: "10.0.2.1"
       web01ubuntu.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true

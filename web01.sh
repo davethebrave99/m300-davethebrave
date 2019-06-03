@@ -8,8 +8,6 @@ sudo systemctl enable httpd
 #Disable selinux
 sudo sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
 
-reboot
-
 #activate firewall
 sudo systemctl start firewalld
 sudo systemctl enable firewalld
@@ -25,4 +23,4 @@ sudo firewall-cmd --reload
 #Configure Reverse-Proxy
 #yum install install libapache2-mod-proxy-html -y
 
-
+reboot
