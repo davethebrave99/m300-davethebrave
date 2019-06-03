@@ -1,26 +1,60 @@
 #!/bin/bash
 
-#Install apache webserver
-sudo yum install httpd -y
-sudo systemctl start httpd
-sudo systemctl enable httpd
+#Change vagrant password
+sudo echo "barth" | passwd --stdin vagrant
 
-#Disable selinux
-sudo sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+#update
+sudo apt-get update -y
+sudo apt-get install apache2-bin
+
+#Install apache webserver
+sudo apt-get install apache2 -y
+sudo service apache2 start 
+sudo service apache2 enable
+
 
 #activate firewall
-sudo systemctl start firewalld
-sudo systemctl enable firewalld
+sudo apt-get install ufw -y
+yes | sudo ufw enable
 
 #set firewall rules
-sudo firewall-cmd --permanent --add-port=22/tcp
-sudo firewall-cmd --permanent --add-port=22/udp
-sudo firewall-cmd --permanent --add-port=80/tcp
-sudo firewall-cmd --permanent --add-port=443/tcp
+sudo ufw deny out to any
+sudo ufw allow 22
+sudo ufw allow 80/tcp
+sudo ufw allow 80/udp
+sudo ufw allow 443/tcp
+sudo ufw allow 443/udp
 
-sudo firewall-cmd --reload
+#reload firewall
+yes | sudo ufw enable
 
 #Configure Reverse-Proxy
-#yum install install libapache2-mod-proxy-html -y
+sudo apt-get install libapache2-mod-proxy-html -y
+sudo apt-get install libxml2-dev -y
 
-reboot
+sudo a2enmod proxy
+sudo a2enmod proxy_html
+sudo a2enmod proxy_http
+
+sudo service apache2 restart
+
+# append to /etc/apache2/apache2.conf
+echo "" >> /etc/apache2/apache2.conf
+echo "ServerName web01" >> /etc/apache2/apache2.conf
+
+sudo service apache2 restart
+
+# /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "# Allgemeine Proxy Einstellungen" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "ProxyRequests Off" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "<Proxy *>" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "  Order deny,allow" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "   Allow from all" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "</Proxy>" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "# Weiterleitungen master" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "ProxyPass /master http://master" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+echo "ProxyPassReverse /master http://master" >> /etc/apache2/sites-enabled/001-reverseproxy.conf
+
+#restart apache2 service
+sudo service apache2 restart

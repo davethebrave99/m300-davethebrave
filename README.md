@@ -144,6 +144,12 @@ web01.vm.network "forwarded_port", guest:443, host:4343, auto_correct: true
 ```
 <br>
 
+Standardmässig wird bei jeder Vagrant-VM ein NAT-Adapter eingerichtet. Wenn man möchte kann man noch mithilfe des Network-Parameters zusätzliche Netzwerkadapter einrichten. In meinem Falle habe ich für jede VM noch ein privates Netz mit einer IP-Adresse der Klasse C eingerichtet (192.168.1.XXX/24). Somit können die virtuellen Maschinen auch untereinander kommunizieren.
+```
+web01.vm.network "private_network", ip: "192.168.1.10"
+```
+<br>
+
 Mit dem Provider-Parameter können wir den Namen & Memory angeben, welcher der VM-Provider (in unserem Falle VirtualBox) der virtuellen Maschine gibt.
 ```
 web01.vm.provider "virtualbox" do |vb|
@@ -166,21 +172,30 @@ end
 
 ### Netzwerkplan
 
-WICHTIG: Ubuntu Webserver konnte nicht hinzugefügt werden (Zeitgründe)
+WICHTIG: Der Webserver kann nur über die private IP-Adresse erreicht werden
 
-    +------------------------------------------------------------------------------------+   
-    |NAT Netzwerk 10.0.2.0/24                                                            |   
-    |                                                                                    |   
-    |                                                                                    |   
-    |                                                                                    |   
-    |+---------------------------+ +--------------------+ +-----------------------------+|   
-    ||Hostname: web01            | | Hostname: db01     | |Hostname: master             ||   
-    ||                           | |                    | |                             ||   
-    ||eth0: NAT (DHCP)           | |eth0: NAT (DHCP)    | |eth0: NAT (DHCP)             ||   
-    ||Ports: 80, 443 (any to any)| |OS: CentOS/7        | |Ports: 80, 443 (web01 to any)||  
-    ||OS: Ubuntu/trusty64        | |                    | |OS: CentOS/7                 ||   
-    |+---------------------------+ +--------------------+ +-----------------------------+|   
-    +------------------------------------------------------------------------------------+   
+    +---------------------------------------------------------------+                                                                       
+    | Privates Netzwerk 192.168.1.0/24                              |                                                                       
+    | Zusätzlich pro VM 1x NAT Verbindung von Gast zu Host          |                                                                       
+    |                                                               |                                                                       
+    |                                                               |                                                                       
+    | +---------------------------+  +----------------------------+ |                                                                       
+    | |Hostname: ws01             |  | Hostname: web01            | |                                                                       
+    | |                           |  |                            | |                                                                       
+    | |eth0: NAT (DHCP)           |  | enp0s3: NAT (DHCP)         | |                                                                       
+    | |eth1: 192.168.1.10/24      |  | enp0s8: 192.168.1.30/24    | |                                                                       
+    | |Ports: 80, 443 (any to any)|  | Ports: 80, 443 (any to any)| |                                                                       
+    | |OS: CentOS/7               |  | OS: Ubuntu/trusty64        | |                                                                       
+    | +---------------------------+  +----------------------------+ |                                                                       
+    | +-----------------------------+ +---------------------------+ |                                                                       
+    | |Hostname: master             | |Hostname: db01             | |                                                                       
+    | |                             | |                           | |                                                                       
+    | |eth0: NAT (DHCP)             | |eth0: NAT (DHCP)           | |                                                                       
+    | |eth1: 192.168.1.20/24        | |eth1: 192.168.1.40/24      | |                                                                       
+    | |Ports: 80, 443 (web01 to any)| |Ports: 3306 (any to any)   | |                                                                       
+    | |OS: CentOS/7                 | |OS: CentOS/7               | |                                                                       
+    | +-----------------------------+ +---------------------------+ |                                                                       
+    +---------------------------------------------------------------+
 
 
 ### Testfälle
@@ -227,40 +242,74 @@ cat /etc/passwd --> Zeigt alle Benutzer im System
 
 
 
-## Sicherheit implementieren <a name="k4"></a>
+## Sicherheitsaspekte sind implementiert <a name="k4"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)
 
 ### Firewall Konfigurationen
 
-#### CentOS
+#### Generelles Aktivieren der Firewall
+##### Ubuntu-Hosts
 
-1. Firewall aktivieren & enablen
+
+Firewall aktivieren/enablen
+```
+yes | sudo ufw enable
+```
+
+Firewall reloaden
+```
+sudo ufw reload
+```
+<br>
+
+##### CentOS7-Hosts
+
+Firewall aktivieren
 ```
 systemctl start firewalld
+```
+
+Firewall enablen
+```
 systemctl enable firewalld
 ```
 
-2. Firewall Rules setzen
+Firewall reloaden
+```
+firewall-cmd --reload
+```
+<br>
+
+#### Config: master-Host
+```
+#set firewall rules
+sudo firewall-cmd --permanent --add-port=22/tcp
+sudo firewall-cmd --permanent --add-port=22/udp
+
+#set firewall rules for http
+sudo firewall-cmd --permanent --zone=public --add-rich-rule='
+  rule family="ipv4"
+  source address="10.0.2.1/32"
+  port protocol="tcp" port="80" accept'
+
+#set firewall rules for https
+sudo firewall-cmd --permanent --zone=public --add-rich-rule='
+  rule family="ipv4"
+  source address="10.0.2.1/32"
+  port protocol="tcp" port="443" accept'
+```
+<br>
+
+#### Config: ws01-Host
 ```
 sudo firewall-cmd --permanent --add-port=22/tcp
 sudo firewall-cmd --permanent --add-port=22/udp
-sudo firewall-cmd --permanent --add-port=80
-sudo firewall-cmd --permanent --add-port=443
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
 ```
 
-3. Firewall-Reload ausführen
+#### Config: web01-Host
 ```
-sudo firewall-cmd --reload
-```
-
-#### Ubuntu
-
-```
-#activate firewall
-sudo apt-get install ufw -y
-yes | sudo ufw enable
-
-#set firewall rules
 sudo ufw deny out to any
 sudo ufw allow 22
 sudo ufw allow 80/tcp
@@ -269,8 +318,14 @@ sudo ufw allow 443/tcp
 sudo ufw allow 443/udp
 ```
 
+#### Config: db01-Host
+```
+sudo firewall-cmd --permanent --add-port=22
+sudo firewall-cmd --permanent --add-port=3306
+```
 <br>
-### Reverse Proxy
+
+### Reverse Proxy einrichten
 
 1. Notwendige Pakete installieren
 ```
@@ -309,7 +364,49 @@ Allgemeine Proxy Einstellungen
     ProxyPassReverse /master http://master
 ```
 
+### User-Passwort
+
+Um die virtuellen Mashcinen besser zu schützen empfiehlt es sich das Standardpasswort vom Benutzer vagrant zu ändern. Dies kann im Provisioning-Shellscript getan werden.
+```
+sudo echo "complexpassword" | passwd --stdin vagrant
+```
+
+### Ngrok Tunnel erstellen
+
+Da ich diesen Schritt
+
+1. Ngrok herunterladen & Archiv entpacken 
+```
+wget -qO- https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip | tar xvz -
+```
+
+2. Als nächstes muss man einen eigenen Auth-Token erstellen. Diesen bekommt man wenn man sich unter https://dashboard.ngrok.com/login registriert.
+
+3. Hat man seinen Auth-Token generiert führt man im entpackten Archiv den folgenden Befehl aus.
+```
+./ngrok authtoken <YOUR_AUTH_TOKEN>
+```
+
+Nun sieht man die offenen Tunnels. Um einen neuen Tunnel zu öffnen führt man einfach einen der unten stehenden Befehle aus.
+```
+./ngrok http 80 --> HTTP Tunnel starten
+```
+```
+./ngrok http 22 --> SSH Tunnel starten
+```
+
 ## Zusätzliche Bewertungspunkte <a name="k5"></a>
 > [⇧ **Nach oben**](#inhaltsverzeichnis)
 
 ### Reflexion
+
+Ich konnte mich in diesem Projekt in folgenden Punkten verbessern
+* Linux-Services wie Apache, MySQL etc.
+* Shell-Scripts
+* Allgemeine Linux-Befehle
+* Umgang mit der Linux CLI
+
+Ich habe zuvor noch nie mit Vagrant gearbeitet und habe deshalb mit dieser LB sehr viel neues gelernt.
+Ich konnte zudem meine Kenntnisse in Linux (Ubuntu und CentOS) sowie dem Skripten mit Bash erweitern.
+
+Die Arbeit mit Vagrant hat mir Spass gemacht und war sicherlich eine gute Vorbereitung auf die LB3 mit Docker & Kubernets.

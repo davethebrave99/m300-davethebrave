@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Change vagrant password
+sudo echo "barth" | passwd --stdin vagrant
+
 #Install apache webserver
 sudo yum install httpd -y
 sudo systemctl start httpd
