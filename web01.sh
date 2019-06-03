@@ -1,15 +1,28 @@
 #!/bin/bash
 
 #Install apache webserver
-yum install httpd -y
-systemctl start httpd
-systemctl enable httpd
+sudo yum install httpd -y
+sudo systemctl start httpd
+sudo systemctl enable httpd
 
 #Disable selinux
-sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+sudo sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+
+reboot
+
+#activate firewall
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
 
 #set firewall rules
-firewall-cmd --permanent --add-port=80/tcp
-firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --permanent --add-port=22/tcp
+sudo firewall-cmd --permanent --add-port=22/udp
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
 
-firewall-cmd --reload
+sudo firewall-cmd --reload
+
+#Configure Reverse-Proxy
+#yum install install libapache2-mod-proxy-html -y
+
+

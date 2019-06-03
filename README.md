@@ -102,26 +102,87 @@ vagrant up
 
 
 
-### VM mit eigenem Vagrantfile aufsetzen
+### VMs mit eigenem Vagrantfile aufsetzen
 ***
 
+In diesem Abschnitt dokumentiere ich die Arbeit an meiner eigenen VM-Umgebung. Ich möchte mit einem Vagrantfile mehrere VMs erzeugen, welche auch miteinander kommunizieren könnenn (siehe Abschnitt Netzwerkplan weiter unten).
+
+1. Wir gehen in das eigene Repository von M300
+```
 cd ./m300-davethebrave/
+```
 
-
+2. Als nächstes erstellt man ein Vagrantfile und spezifiziert das Betriebssystem
+```
 vagrant init centos/7
+```
 
-bevor wir nun die vm starten wollen wir das vagrantfile bearbeiten
+#### Vagrantfile
 
+Als nächstes geht es darum das Vagranfile zu modifizieren. Dieses finden Sie im Repostiory unter dem standardmässigen Namen (Vagrantfile). Ich füge dieses hier aus Übersichtsgründen nicht ein sondern kommentiere lediglich die einzelnen Parameter aus.
 
+Dies steht am Anfang des Vagrantfiles und definiert den Anfang der Konfigurationsdatei. Beendet wird diese Schlaufe mit dem "end" Parameter".
+```
+Vagrant.configure("2") do |config|
+```
+<br>
 
-Das Vagrantfile sieht mit dem Befehl "vagrant init centos/7 folgendermassen aus
+Diese Linie definiert eine einzelne virtuelle Maschine. In diesem Falle wäre das die virtuelle Maschine "web01".
+```
+config.vm.define "web01" do |web01|
+```
+<br>
 
-insertcode
+Die Parameter welche folgen beginnen grösstenteils mit web01(Variable für die VM).vm(Angabe dass es sich um eine VM handelt).[Individueller Parameter]
+<br>
+Dieser Parameter bestimmt den Hostnamen
+```
+web01.vm.hostname = "web01"
+```
+<br>
 
-Dieses File modifizieren wir noch mit den folgenden Zeilen
+Mit dem Parameter Network können wir die freigegebenen Ports von Host zu Gast bestimmen. In diesem Falle erlauben wir jeglichen HTTP/HTTPS-Traffic.
+```
+web01.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
+web01.vm.network "forwarded_port", guest:443, host:4343, auto_correct: true
+```
+<br>
+
+Mit dem Provider-Parameter können wir den Namen & Memory angeben, welcher der VM-Provider (in unserem Falle VirtualBox) der virtuellen Maschine gibt.
+```
+web01.vm.provider "virtualbox" do |vb|
+    vb.memory = "1024"
+    vb.name = "web01"
+end
+```
+<br>
+
+Mit dem Provision-Parameter können verschiedene Arten gewählt werden die VM weiter zu konfigurieren. In meinem Falle verweise ich auf ein Shell-Skript, welches ebenfalls in diesem Repository zu finden ist.
+```
+web01.vm.provision "shell", path: "web01.sh"
+```
+<br>
+
+Zu guter Letzt beendet man die Konfiguration dieser VM mit "end".
+```
+end
+```
 
 ### Netzwerkplan
 
++------------------------------------------------------------------------------------+   
+|NAT Netzwerk 10.0.2.0/24                                                            |   
+|                                                                                    |   
+|                                                                                    |   
+|                                                                                    |   
+|+---------------------------+ +--------------------+ +-----------------------------+|   
+||Hostname: web01            | | Hostname: db01     | |Hostname: master             ||   
+||                           | |                    | |                             ||   
+||eth0: NAT (DHCP)           | |eth0: NAT (DHCP)    | |eth0: NAT (DHCP)             ||   
+||Ports: 80, 443 (any to any)| |OS: CentOS/7        | |Ports: 80, 443 (web01 to any)||  
+||OS: Ubuntu/trusty64        | |                    | |OS: CentOS/7                 ||   
+|+---------------------------+ +--------------------+ +-----------------------------+|   
++------------------------------------------------------------------------------------+   
 
 
 ### Testfälle
