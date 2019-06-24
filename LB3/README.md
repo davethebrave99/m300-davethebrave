@@ -2,6 +2,9 @@
 
 In dieser Dokumentation weise ich die einzelnen Kompetenzen für die Lerbeurteilung 3 nach.
 
+WICHTIGE INFORMATIONEN IM VORAUS:
+Ich habe immer eine Vagrant-VM erstellt, auf der ich dann die Docker-Container laufen lassen habe.
+
 ## Inhaltsverzeichnis
 
 * K1 - [Toolumgebung aufsetzen](#k1)
@@ -67,6 +70,33 @@ Beispiel:
 Bei Amazon könnte die Unterteilung in Microservices gemacht werden mit Bestellungsservice - Wunschliste - Zahlungsprozzessverarbeitung etc.
 
 ## (Eigene) Docker-Projekte
+### Bestehende Docker-Container kombinieren / Bestehende Container als Backend, Desktop-App als Frontend einsetzen
+
+Wir wollen als erstes zwei Docker-Container miteinander kombinieren. Dabei soll der eine Container ein Webfrontend mit Webserver enthalten, während der andere Container die Datenbank, also das Backend enthält.
+
+Die nötigen Docker-Images können direkt beim Erstellen der VM heruntergeladen werden.
+```
+# Docker Provisioner
+    config.vm.provision "docker" do |d|
+      d.pull_images "mysql:8.0.16"
+      d.pull_images "ghost:2.25.1-alpine"
+```
+
+dann vagrant up
+
+docker run -d -name ghost_mysql -p 3306 mysql:5.7 -e MYSQL_ROOT_PASSWORD=barth -e MYSQL_USER=ghost MYSQL_PASSWORD=barth -e MYSQL_DATABASE=ghost --restart=always
+
+docker run -d -name ghost ghost:2.25.1-alpine --link ghost
+
+
+
+
+### Volumes zur persistenten Datenablage eingerichtet
+
+
+
+
+
 
 
 
@@ -78,11 +108,10 @@ Bei Amazon könnte die Unterteilung in Microservices gemacht werden mit Bestellu
 | docker help | Zeigt eine Liste aller Vagrant-Boxen welche in der Vagrant-Umgebung vorhanden sind |
 | docker --version | Zeigt eine Liste aller Vagrant-Boxen welche in der Vagrant-Umgebung vorhanden sind |
 | docker stats | Fügt eine Vagrant-Box aus der Vagrant-Cloud hinzu |
-| docker ps (-a) (-q) [OS/ARCHITECTURE] | erstellt Vagrantfile |
+| docker ps (-a) (-q) | erstellt Vagrantfile |
 | docker images | erstellt eine VM mithilfe des Vagrantfiles | 
 | docker push | SSH-Verbindung zur Vagrant-VM |
-| docker pull | fährt die Vagrant-VM herunter |
-| vagrant destroy | fährt die Vagrant VM herunter & zerstört diese anschliessen |
+| docker pull | XXXXXXXXXXXXXXX |
 
 #### Befehle um Docker Container zu 
 
@@ -117,10 +146,22 @@ docker rmi [IMAGENAME]
 ssh into containers
 http://phase2.github.io/devtools/common-tasks/ssh-into-a-container/
 
+### Netzwerkplan
 
-
+### Testfälle
 
 ## Sicherheitsaspekte sind implementiert
+
+- [x] Sicherheitsmassnahmen zur eigenen Umgebung sind dokumentiert
+- [x] Projekt mit Git & Markdown dokumentiert
+
+### Service-Überwachung ist eingerichtet
+
+### Aktive Benachrichtigung ist eingerichtet
+
+### Drei Aspekte der Container
+
+
 
 ## Zusätzliche Bewertungspunkte (Allgemein)
 
