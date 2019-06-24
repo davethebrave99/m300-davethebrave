@@ -24,9 +24,12 @@ Vagrant.configure("2") do |config|
     # using a specific IP.
     config.vm.hostname = "docker"
     config.vm.network "private_network", ip:"192.168.60.101"
-        
-    # Share an additional folder to the guest VM.
-    #config.vm.synced_folder "./", "/vagrant_data"
+    
+    config.vm.provision "shell",
+      inline: "mkdir /home/vagrant/shared_folder; true"
+
+    #Share an additional folder to the guest VM.
+    config.vm.synced_folder "shared_folder/", "/home/vagrant/shared_folder"
   
     config.vm.provider "virtualbox" do |vb|
        vb.memory = "2048"
@@ -34,6 +37,10 @@ Vagrant.configure("2") do |config|
   
     # Docker Provisioner
     config.vm.provision "docker" do |d|
-     d.pull_images "ubuntu:14.04"
+      #d.pull_images "ubuntu:14.04"
+      #d.pull_images "alpine:3.10.0"
+      d.pull_images "php:7.4.0alpha1-apache-stretch"
     end
-  end
+
+    config.vm.provision "shell", path: "./shared_folder/scripts/provision.sh"
+end

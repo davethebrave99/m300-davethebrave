@@ -1,0 +1,9 @@
+FROM jenkins/jenkins:lts
+
+EXPOSE 8082
+
+USER root
+
+USER jenkins
+
+VOLUME /vagrant

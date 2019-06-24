@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"C:/Users/TAABADAD/m300-davethebrave/LB3","disabled":false,"__vagrantfile":true}}}
+{"virtualbox":{"/home/vagrant/shared_folder":{"guestpath":"/home/vagrant/shared_folder","hostpath":"C:/Users/TAABADAD/m300-davethebrave/LB3/shared_folder","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"C:/Users/TAABADAD/m300-davethebrave/LB3","disabled":false,"__vagrantfile":true}}}

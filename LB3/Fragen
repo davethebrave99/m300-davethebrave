@@ -1,0 +1,44 @@
+Fragen
+Container
+Was ist der Unterschied zwischen Vagrant und Docker?
+
+Antwort
+ 	Vagrant ist für IaaS und Docker für PaaS
+Was welches Tools aus dem Docker Universum ist Vergleichbar mit Vagrant?
+
+Antwort
+ 	docker machine
+Was macht der Docker Provisioner ?
+
+Antwort
+ 	Installiert Docker in einer VM
+Docker
+Was ist der Unterschied zwischen einem Docker Image und einem Container?
+
+Antwort
+ 	Image = gebuildet und readonly, Container Image + aktuelle Änderungen im Filesystem
+Was ist der Unterschied zwischen einer Virtuellen Maschine und einem Docker Container?
+
+Antwort
+ 	VM hat Betriebssystem mit am laufen, Docker nur die eigenen Prozesse
+Wie bekomme ich Informationen zu einem laufenden Docker Container?
+
+Antwort
+ 	docker logs, docker inspect
+Docker Hub
+Was ist der Unterschied zwischen der Verwendung der Docker Registry und docker save und docker load?
+
+Antwort
+ 	Registry ist in der Cloud und Images sind für alle sichtbar, save und load passiert lokal mit Dateien
+Was ist der Unterschied zwischen docker save/docker load und docker export/docker import?
+
+Antwort
+ 	save/load ist für Images, export/import für Container
+Was ist bei einer eigenen Registry zu beachten?
+
+Antwort
+ 	Sicherheit, bzw. das mögliche Fehlen davon
+Warum sollten Versionen tag von Images immer angegeben werden?
+
+Antwort
+ 	Ansonsten wird `latest` verwendet und so nicht sicher ist welche Version wirklich verwendet wird
