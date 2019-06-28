@@ -82,13 +82,26 @@ Die nötigen Docker-Images können direkt beim Erstellen der VM heruntergeladen 
       d.pull_images "ghost:2.25.1-alpine"
 ```
 
-dann vagrant up
+Danach startet man die Vagrant-VM
+```
+vagrant up
+```
 
-docker run -d -name ghost_mysql -p 3306 mysql:5.7 -e MYSQL_ROOT_PASSWORD=barth -e MYSQL_USER=ghost MYSQL_PASSWORD=barth -e MYSQL_DATABASE=ghost --restart=always
+Da wir die nötigen Docker-Images nun bereits beim Starten der Vagrant-VM heruntergeladen haben können wir direkt die beiden Docker-Container mit "docker run" starten.
+```
+docker run -d --name ghost_mysql -p 3306:3306 -p 8080:80 -e MYSQL_ROOT_PASSWORD=barth -e MYSQL_USER=ghost -e MYSQL_PASSWORD=barth -e MYSQL_DATABASE=ghost mysql:8.0.16 --restart-always
+```
+
+
+
 
 docker run -d -name ghost ghost:2.25.1-alpine --link ghost
 
 
+d.run "ghost", image: "ghost:1-alpine", args: "--link ghost_mysql:mysql -e database__client=mysql -e database__connection__host=ghost_mysql -e database__connection__user=ghost -e database__connection__password=secret -e database__connection__database=ghost -p 2368:2368 --restart=always"
+
+
+separates directory erstellen in meinem repo
 
 
 ### Volumes zur persistenten Datenablage eingerichtet
@@ -96,7 +109,7 @@ docker run -d -name ghost ghost:2.25.1-alpine --link ghost
 
 
 
-
+PROBLEM BEI EIGENEM PROJEKT - Dockerfile wird nicht gefunden
 
 
 
