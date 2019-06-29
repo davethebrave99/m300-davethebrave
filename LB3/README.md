@@ -31,6 +31,11 @@ Ich habe immer eine Vagrant-VM erstellt, auf der ich dann die Docker-Container l
 
 - [x] Persönlicher Wissensstand zu den wictigsten Themen ist dokumentiert:
 
+### Persönlicher Wissensstand
+
+Ich weiss in der Theorie wie Docker funktioniert und kann erklären wie es funktioniert (Abgeschottete Systeme welche sich von den Ressourcen des Host-Systemes bedienen etc.)
+Ich habe in der Praxis vor diesem Modul noch NIE mit Docker gearbeitet und bin sehr gespannt was sich aus den Lektionen in diesem Modul ergeben wird.
+
 ### Containerisierung
 
 Container sind "virtuelle Maschinen" welche sich die Ressourcen mit dem Host-Betriebssystem teilen und deshalb sehr wenig Bedarf an Speicherplatz haben.
@@ -90,26 +95,79 @@ vagrant up
 Da wir die nötigen Docker-Images nun bereits beim Starten der Vagrant-VM heruntergeladen haben können wir direkt die beiden Docker-Container mit "docker run" starten.
 ```
 docker run -d --name ghost_mysql -p 3306:3306 -p 8080:80 -e MYSQL_ROOT_PASSWORD=barth -e MYSQL_USER=ghost -e MYSQL_PASSWORD=barth -e MYSQL_DATABASE=ghost mysql:8.0.16 --restart-always
+
+docker run -d --name ghost -p 2368:2368 --link ghost_mysql:mysql -e database_client=mysql -e database__connection__host=ghost_mysql -e database__connection__user=ghost -e database__connection__password=barth -e database__connection__database=ghost ghost:2.25.1-alpine --restart=always
 ```
 
-
-
-
-docker run -d -name ghost ghost:2.25.1-alpine --link ghost
-
-
+Durch das öffnen der Ports mit dem "-p"-Parameter und dem Link vom "ghost_mysql"-Container zum "mysql"-Container sind die beiden Container miteinander verbunden und können miteinander kommunizieren.
+Man kann diese Commands entweder über Bash ausführen oder direkt im Vagrantfile im Docker Provisioning, siehe weiter unten:
+```
+d.run "ghost_mysql", image: "mysql:5.7", args: "-e MYSQL_ROOT_PASSWORD=admin -e MYSQL_USER=ghost -e MYSQL_PASSWORD=secret -e MYSQL_DATABASE=ghost --restart=always"
 d.run "ghost", image: "ghost:1-alpine", args: "--link ghost_mysql:mysql -e database__client=mysql -e database__connection__host=ghost_mysql -e database__connection__user=ghost -e database__connection__password=secret -e database__connection__database=ghost -p 2368:2368 --restart=always"
+```
 
+### Eigene Docker Container erstellen
+Siehe Verzeichnis: **eigene_umgebung**
 
-separates directory erstellen in meinem repo
+Ich habe eine Docker-Umgebung mit Vagrant eingerichtet, auf welcher sich ein Apache-Container und ein MYSQL-Container befindet. Beide Container können miteinander interagieren.
 
+#### Vagrantfile
+Ich werde die verschiedenen Abschnitte aus dem Vagrantfile erläutern. Aus Übersichtsgründen werde ich jedoch nicht das ganze Vagrantfile abbilden, dies kann auch so separat angeschaut werden.
+
+Base-Image definiert
+```
+config.vm.box = "ubuntu/xenial64"
+```
+
+```
+    config.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
+    config.vm.network "forwarded_port", guest:8081, host:8081, auto_correct: true
+    config.vm.network "forwarded_port", guest:8082, host:8082, auto_correct: true
+    config.vm.network "forwarded_port", guest:3306, host:3306, auto_correct: true  
+    for i in 32760..32780
+      config.vm.network :forwarded_port, guest: i, host: i
+    end
+```
+
+dann noch...
+```
+    config.vm.hostname = "docker"
+    config.vm.network "private_network", ip:"192.168.60.101"
+```
+```
+config.vm.provider "virtualbox" do |vb|
+       vb.memory = "2048"
+    end
+```
+
+sync this
+```
+    config.vm.synced_folder "shared_folder/", "/home/vagrant/shared_folder"
+```
+
+pull images
+```
+    config.vm.provision "docker" do |d|
+      d.pull_images "mysql:8.0.16"
+      d.pull_images "php:7.4.0alpha1-apache-stretch"
+    end
+```
+
+#### In der Docker-VM
+Nun wollen wir unsere Docker-Container starten
+
+```
+docker run
+docker run
+```
 
 ### Volumes zur persistenten Datenablage eingerichtet
 
+Es gibt bei Docker verschiedene Arten Volumes zur dauerhaften Ablage von Daten zu erstellen.
+Für meine Docker-Umgebung
 
 
 
-PROBLEM BEI EIGENEM PROJEKT - Dockerfile wird nicht gefunden
 
 
 
@@ -161,6 +219,8 @@ http://phase2.github.io/devtools/common-tasks/ssh-into-a-container/
 
 ### Netzwerkplan
 
+
+
 ### Testfälle
 
 ## Sicherheitsaspekte sind implementiert
@@ -169,6 +229,7 @@ http://phase2.github.io/devtools/common-tasks/ssh-into-a-container/
 - [x] Projekt mit Git & Markdown dokumentiert
 
 ### Service-Überwachung ist eingerichtet
+https://github.com/mc-b/M300/tree/master/35-Sicherheit
 
 ### Aktive Benachrichtigung ist eingerichtet
 
