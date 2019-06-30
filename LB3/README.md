@@ -213,10 +213,27 @@ Da ich nicht mit "docker-compose" arbeite habe ich zwei separate Dockerfiles ers
 Nun können aber die Images mit folgenden Commands gebuildet werden.
 
 ```
-
+cd ./shared_folder/dockerfiles/db/
+docker build -t databaseserver_image:version01 .
+cd ./shared_folder/dockerfiles/web/
+docker built t webserver_image:version01 .
 ```
 
-docker build commands
+Danach können die beiden Docker-Container durch die eigen gebauten Images mit den folgenden Commands gestartet werden:
+```
+docker run -d --name databaseserver databaseserver_image:version01
+docker run -d --name webserver -p 80:8080 --link databaseserver:webserver webserver_image:version01
+```
+
+#### Restliche umgebungsvariablen von mysql
+
+#### für webserver src folder verlinken
+
+#### mysql client auf webserver einrichten
+
+#### cgi script einrichten
+
+#### Volle automation durch bash script
 
 ### Volumes zur persistenten Datenablage eingerichtet
 
@@ -275,9 +292,32 @@ ssh into containers
 http://phase2.github.io/devtools/common-tasks/ssh-into-a-container/
 
 ### Netzwerkplan
-
-
-
+                                                                                                 
+    +--------------------------------------------------------------------------------------+         
+    |  TBZ-Internes Netzwerk                                                               |         
+    |  (Host Operating System)                                                             |         
+    | +-----------------------------------------------------------------------------------+|         
+    | | Vagrant-VM (Guest Operating System)                                               ||         
+    | |                                                                                   ||         
+    | |                                                                                   ||         
+    | | Hostname: docker                        Network Interface Cards:                  ||         
+    | | OS: Ubuntu 16.04.6 LTS                  docker0 172.17.0.1 (Docker Adapter)       ||         
+    | |                                         enp0s3: 10.0.2.15(NAT Adapter)            ||         
+    | | Open Ports:                             enp0s8: 192.168.60.101 (Privates Netzwerk)||         
+    | | 80, 3306, 8081, 8082, 32760-32780       lo: 127.0.0.1 (Loopback IF)               ||         
+    | |                                                                                   ||         
+    | |                                                                                   ||         
+    | | +--------------------------------------+ +---------------------------------------+||         
+    | | | Web-Container                        | | Database-Container                    |||         
+    | | |                                      | |                                       |||         
+    | | | Base-Image:                          | | Base-Image: mysql:8.0.16              |||         
+    | | | php:7.4.0alpha1-apache-stretch       | | Open Ports: 3306                      |||         
+    | | | Open Ports: 80, 3306                 | | Additional Software: -                |||         
+    | | | Additional Software: MySQL-Client    | |                                       |||         
+    | | +--------------------------------------+ +---------------------------------------+||         
+    | +-----------------------------------------------------------------------------------+|         
+    +--------------------------------------------------------------------------------------+         
+                                                                                              
 ### Testfälle
 
 Testfall 1: Wurde Docker installiert & ist die Software funktionstüchtig
