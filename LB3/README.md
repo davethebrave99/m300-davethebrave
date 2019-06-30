@@ -75,6 +75,7 @@ Beispiel:
 Bei Amazon könnte die Unterteilung in Microservices gemacht werden mit Bestellungsservice - Wunschliste - Zahlungsprozzessverarbeitung etc.
 
 ## (Eigene) Docker-Projekte
+
 ### Bestehende Docker-Container kombinieren / Bestehende Container als Backend, Desktop-App als Frontend einsetzen
 
 Wir wollen als erstes zwei Docker-Container miteinander kombinieren. Dabei soll der eine Container ein Webfrontend mit Webserver enthalten, während der andere Container die Datenbank, also das Backend enthält.
@@ -107,18 +108,21 @@ d.run "ghost", image: "ghost:1-alpine", args: "--link ghost_mysql:mysql -e datab
 ```
 
 ### Eigene Docker Container erstellen
+
 Siehe Verzeichnis: **eigene_umgebung**
 
 Ich habe eine Docker-Umgebung mit Vagrant eingerichtet, auf welcher sich ein Apache-Container und ein MYSQL-Container befindet. Beide Container können miteinander interagieren.
 
 #### Vagrantfile
+
 Ich werde die verschiedenen Abschnitte aus dem Vagrantfile erläutern. Aus Übersichtsgründen werde ich jedoch nicht das ganze Vagrantfile abbilden, dies kann auch so separat angeschaut werden.
 
-Base-Image definiert
+Als Base-Image habe ich Ubuntu (Xenial64) definiert.
 ```
 config.vm.box = "ubuntu/xenial64"
 ```
 
+Im nächsten Abschnitt habe ihc einige wichtige Ports weitergeleitet, welche für mein Projekt gebraucht werden.
 ```
     config.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
     config.vm.network "forwarded_port", guest:8081, host:8081, auto_correct: true
@@ -129,7 +133,9 @@ config.vm.box = "ubuntu/xenial64"
     end
 ```
 
-dann noch...
+Der Hostname der VM wird schlichtweg zu "docker" gesetzt.
+Das Vagrantfile richtet noch einen zusätzlichen Netzwerkadapter ein, der eine Private IP aus Klasse C hat.
+Als VM-Provider benutze ich VirtualBox.
 ```
     config.vm.hostname = "docker"
     config.vm.network "private_network", ip:"192.168.60.101"
@@ -140,12 +146,12 @@ config.vm.provider "virtualbox" do |vb|
     end
 ```
 
-sync this
+Damit Files zwischen Host- und Gastbetriebssystem geteilt werden können richte ich für die Vagrant-VM einen Shared-Folder ein.
 ```
     config.vm.synced_folder "shared_folder/", "/home/vagrant/shared_folder"
 ```
 
-pull images
+Für mein Projekt brauche ich einmal ein MySQL-Image und ein PHP/Apache-Image. Diese werden durch das Vagrantfile im foldenen Abschnitt heruntergeladen.
 ```
     config.vm.provision "docker" do |d|
       d.pull_images "mysql:8.0.16"
@@ -153,20 +159,71 @@ pull images
     end
 ```
 
+Nun starte ich die Vagrant-VM, wo sich nach erstem Boot Docker darauf befinden soll, mit folgendem Command:
+```
+vagrant up
+```
+
 #### In der Docker-VM
-Nun wollen wir unsere Docker-Container starten
+
+Ich habe eine VM mit Docker und bereits heruntergeladenen Images aus dem vorherigen Schritt. Nun startet man die Docker-Container mit den folgenden Befehlen:
 
 ```
-docker run
-docker run
+docker run -d --name databaseserver -e MYSQL_ROOT_PASSWORD=barth --expose 3306 mysql:8.0.16
+
+docker run -d --name webserver -p 80:8080 --expose 80 --expose 3306 --link databaseserver:webserver php:7.4.0alpha1-apache-stretch
 ```
+
+Erklärungen:
+* "-d"-Parameter startet den Container im detached-Mode
+* --name legt den Namen des Containers fest
+* "-e"-Parameter um eine Umgebungsvariable zu setzen
+* --expose um im Container einen Port zu öffnen
+
+Die beiden Docker-Container laufen nun, jedoch kann man diese mit weniger langen Commands starten, wenn man ein selber gebuildetes Image durch ein Dockerfile gebuildet hat (siehe nächster Schritt).
+
+#### Images mit Dockerfile builden
+
+Wie bereits erwähnt will man nicht immer so lange Commands eintippen und die Docker-Container einfacher starten können. Dies tut man durch Dockerfiles. Weiter unten habe ich die Dockerfiles für die beiden Docker-Container, welche ich im vorherigen Schritt gestartet habe, zitiert.
+
+Dockerfile für den Database-Server:
+```
+## Base-Image definieren ##
+FROM mysql:8.0.16
+## Ports auf dem Container freigeben ##
+EXPOSE 3306
+## Wichtige Umgebungsvariablen setzen ##
+ENV MYSQL_ROOT_PASSWORD barth
+```
+
+Dockerfile für den Webserver:
+```
+## Base-Image definieren ##
+FROM php:7.4.0alpha1-apache-stretch
+## Ports auf dem Container freigeben ##
+EXPOSE 80
+EXPOSE 3306
+## Wichtige Umgebungsvariablen setzen ##
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/apache2
+```
+
+Da ich nicht mit "docker-compose" arbeite habe ich zwei separate Dockerfiles erstellt. 
+Nun können aber die Images mit folgenden Commands gebuildet werden.
+
+```
+
+```
+
+docker build commands
 
 ### Volumes zur persistenten Datenablage eingerichtet
 
 Es gibt bei Docker verschiedene Arten Volumes zur dauerhaften Ablage von Daten zu erstellen.
 Für meine Docker-Umgebung
 
-
+volume /var/www/html beim Webserver
 
 
 
@@ -223,6 +280,35 @@ http://phase2.github.io/devtools/common-tasks/ssh-into-a-container/
 
 ### Testfälle
 
+Testfall 1: Wurde Docker installiert & ist die Software funktionstüchtig
+
+Ein einfacher Testfall wurde dokcer installiert?
+```
+docker --version
+```
+
+Testfall 2: Funktionieren die einfachen Dockerbefehle
+```
+simple docker commands
+```
+
+werden die docker container gestartet? laufen sie? oder ---
+```
+docker ps
+docker ps -a
+```
+
+Testfall 3: wird das Dockerfile gefunden?
+```
+docker run this
+```
+
+Testfall 4: Funktioniert bei meinem eigenen Projekt die Portweiterleitung vom Container bis nach aussen zum Host-Betriebssystem der Vagrant-VM?
+
+Browser öffnen --> http://localhost:8080 eingeben
+
+
+
 ## Sicherheitsaspekte sind implementiert
 
 - [x] Sicherheitsmassnahmen zur eigenen Umgebung sind dokumentiert
@@ -230,6 +316,10 @@ http://phase2.github.io/devtools/common-tasks/ssh-into-a-container/
 
 ### Service-Überwachung ist eingerichtet
 https://github.com/mc-b/M300/tree/master/35-Sicherheit
+
+https://stackoverflow.com/questions/46099874/how-can-i-forward-a-port-from-one-docker-container-to-another
+
+
 
 ### Aktive Benachrichtigung ist eingerichtet
 
