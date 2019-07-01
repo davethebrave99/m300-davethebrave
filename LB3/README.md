@@ -12,9 +12,9 @@ Ich habe immer eine Vagrant-VM erstellt, auf der ich dann die Docker-Container l
 * K3 - [Vagrant Vertiefung](#k3)
 * K4 - [Sicherheit implementieren](#k4)
 * K5 - [Zusätzliche Bewertungspunkte](#k5)
-* K6
+* K6 - [Zusätzliche, systemtechnische Bewertungspunkte](#k6) 
 
-## Toolumgebung aufsetzen
+## Toolumgebung aufsetzen <a name="k1"></a>
 
 - [x] VirtualBox installiert
 - [x] Vagrant installiert
@@ -22,7 +22,7 @@ Ich habe immer eine Vagrant-VM erstellt, auf der ich dann die Docker-Container l
 - [x] Git-Client installiert
 - [x] SSH-Key für Client erstellt
 
-## Lernumgebung einrichten
+## Lernumgebung einrichten <a name="k2"></a>
 
 - [x] GitHub-Account ist erstellt
 - [x] Git-Client wurde verwendet
@@ -74,7 +74,7 @@ So kann man dann ganz einfach kleinere Teams zusammenstellen, wobei jedes einzel
 Beispiel:
 Bei Amazon könnte die Unterteilung in Microservices gemacht werden mit Bestellungsservice - Wunschliste - Zahlungsprozzessverarbeitung etc.
 
-## (Eigene) Docker-Projekte
+## (Eigene) Docker-Projekte <a name="k3"></a>
 
 ### Bestehende Docker-Container kombinieren / Bestehende Container als Backend, Desktop-App als Frontend einsetzen
 
@@ -225,11 +225,11 @@ docker run -d --name databaseserver databaseserver_image:version01
 docker run -d --name webserver -p 80:8080 --link databaseserver:webserver webserver_image:version01
 ```
 
-#### Restliche umgebungsvariablen von mysql
+#### Ergänzungen zum MySQL-Image (Weitere Umgebungsvariablen)
 
-#### für webserver src folder verlinken
+#### Verzeichnis synchronisieren (Webserver-Verzeichnis  /var/www/html/)
 
-#### mysql client auf webserver einrichten
+#### Commands durch Dockerfile ausführen (MySQL-Client auf Webserver )
 
 #### cgi script einrichten
 
@@ -238,58 +238,44 @@ docker run -d --name webserver -p 80:8080 --link databaseserver:webserver webser
 ### Volumes zur persistenten Datenablage eingerichtet
 
 Es gibt bei Docker verschiedene Arten Volumes zur dauerhaften Ablage von Daten zu erstellen.
-Für meine Docker-Umgebung
+Für meine Docker-Umgebung named volumes
 
 volume /var/www/html beim Webserver
 
+docker volume create html
 
+
+dann durch "-v html:/var/www/html"
+docker run -d --name webserver -v
+
+so kann container gelöscht werden und das laufwerk wird beim nächsten container wieder gemountet
 
 
 ### Kennt die Docker spezifischen Befehle
-#### Befehle um Docker Container zu managen
+#### Allgemeine Dockerbefehle
 
 | Befehl | Funktion |
 | ----- | ----- |
-| docker help | Zeigt eine Liste aller Vagrant-Boxen welche in der Vagrant-Umgebung vorhanden sind |
-| docker --version | Zeigt eine Liste aller Vagrant-Boxen welche in der Vagrant-Umgebung vorhanden sind |
-| docker stats | Fügt eine Vagrant-Box aus der Vagrant-Cloud hinzu |
-| docker ps (-a) (-q) | erstellt Vagrantfile |
-| docker images | erstellt eine VM mithilfe des Vagrantfiles | 
-| docker push | SSH-Verbindung zur Vagrant-VM |
-| docker pull | XXXXXXXXXXXXXXX |
+| docker help | Zeigt eine Liste aller Docker-Befehle an |
+| docker --version | Zeigt die Version von Docker an |
+| docker stats | Zeigt die Ressourcen an, welche die Container vom Host-Betriebssystem momentan verbrauchen |
+| docker images | Zeigt die heruntergeladenen Docker-Images an | 
+| docker ps (-a) (-q) | Zeigt alle Laufenden (mit -a auch beendete) Docker-Container an | 
 
-#### Befehle um Docker Container zu 
+#### Befehle um Docker-Container zu managen
 
-Version checken
-docker --version
-
-Zeige live stream der container und welche ressourcen sie verbrauchen
-docker stats
-
-stoppe einen oder mehrere container
-docker stop [NAME]
-
-liste alle container auf
-docker ps
-
-alle gepullte docker images auflisten
-docker images
-
-
-Ein docker image auf ein repository pushen/von einem repository pullen
-docker push/pull
---> vorher einloggen mit docker login
-
-
-
-container enfernen
-docker rm [CONTAINERNAME]
-
-docker image entfernen
-docker rmi [IMAGENAME]
-
-ssh into containers
-http://phase2.github.io/devtools/common-tasks/ssh-into-a-container/
+| Befehl | Funktion |
+| ----- | ----- |
+| docker pull [IMAGE] | Image vom Docker-Hub herunterladen |
+| docker push [IMAGE] | Image auf eine Registry pushen |
+| docker build -t [CUSTOM_NAME] [IMAGE_NAME] [DOCKERFILE_PATH] | Image mit einem Dockerfile bereitstellen |
+| docker run [IMAGE_NAME] | Container von einem heruntergeladenen/bereitgestellten Image starten |
+| docker stop [CONTAINER_NAME] | Einen laufenden Container stoppen (Graceful shutdown) |
+| docker kill [CONTAINER_NAME]| Einen laufenden Container sofort herunterfahren |
+| docker start | Einen heruntergefahrenen/gestoppten Container starten - Daten bleiben erhalten|
+| docker rm | Einen Docker-Container entfernen |
+| docker rmi | Ein Docker-Image entfernen |
+| docker exec -it [CONTAINER_NAME] /bin/bash | Ein Bash-Terminal in einem Container öffnen |
 
 ### Netzwerkplan
                                                                                                  
@@ -343,13 +329,17 @@ Testfall 3: wird das Dockerfile gefunden?
 docker run this
 ```
 
+
+docker volume erstellt
+docker volume ls
+
 Testfall 4: Funktioniert bei meinem eigenen Projekt die Portweiterleitung vom Container bis nach aussen zum Host-Betriebssystem der Vagrant-VM?
 
 Browser öffnen --> http://localhost:8080 eingeben
 
 
 
-## Sicherheitsaspekte sind implementiert
+## Sicherheitsaspekte sind implementiert <a name="k4"></a>
 
 - [x] Sicherheitsmassnahmen zur eigenen Umgebung sind dokumentiert
 - [x] Projekt mit Git & Markdown dokumentiert
@@ -367,7 +357,7 @@ https://stackoverflow.com/questions/46099874/how-can-i-forward-a-port-from-one-d
 
 
 
-## Zusätzliche Bewertungspunkte (Allgemein)
+## Zusätzliche Bewertungspunkte (Allgemein) <a name="k5"></a>
 
 ### Übungsdokumentation als Vorlage für Modul-Unterlagen erstellt
 
@@ -377,4 +367,21 @@ https://stackoverflow.com/questions/46099874/how-can-i-forward-a-port-from-one-d
 
 
 
-## Zusätzliche, systemtechnische Bewertungspunkte
+## Zusätzliche, systemtechnische Bewertungspunkte <a name="k6"></a>
+
+### Image-Bereitstellung
+
+Ich habe in meiner Arbeit mithilfe eines Dockerfiles ein eigenes Image bereitgestellt (Siehe Abschnitt Eigene Docker-Projekte --> Eigene Docker Container erstellen --> Images mit Dockerfile builden)
+
+Nochmals eine kurze Zusammenfassung:
+
+Um ein Image bereitzustellen braucht man den Build-Command. Hier der Syntax:
+```
+docker build -t databaseserver_image:version01 .
+```
+
+Mit dem "-t"-Parameter gibt man den Namen des Images an.
+Hängt man keinen Tag mit dem Doppelpunkt an wird ":latest" hinzugefügt.
+
+Am Ende muss der Pfad zum Dockerfile angegeben werden. In diesem Falle befindet sich das Dockerfile im momentanen Working-Directory, da der Pfad einfach als "." angegeben wird.
+
