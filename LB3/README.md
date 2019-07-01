@@ -227,7 +227,7 @@ docker run -d --name webserver -p 80:8080 --link databaseserver:webserver webser
 
 #### Ergänzungen zum MySQL-Image (Weitere Umgebungsvariablen)
 
-#### Verzeichnis synchronisieren (Webserver-Verzeichnis  /var/www/html/)
+In der Übung wo Docker-Container kombiniert 
 
 #### Commands durch Dockerfile ausführen (MySQL-Client auf Webserver )
 
@@ -238,20 +238,27 @@ docker run -d --name webserver -p 80:8080 --link databaseserver:webserver webser
 ### Volumes zur persistenten Datenablage eingerichtet
 
 Es gibt bei Docker verschiedene Arten Volumes zur dauerhaften Ablage von Daten zu erstellen.
-Für meine Docker-Umgebung named volumes
+Für meine Docker-Umgebung habe ich ein Named-Volume für den Webserver-Container entschieden.
 
-volume /var/www/html beim Webserver
+Das Volume soll mit dem Verzeichnis /var/www/html persistent speichern.
 
+Um ein "Named Volume" zu erstellen gibt man folgenden Command ein:
+```
 docker volume create html
+```
 
+Danach kann man den Webserver-Container mit dem folgenden Command starten. Durch den "-v"-Parameter wird das Volume gemountet.
+```
+docker run -d --name webserver -v html:/var/www/html -p 80:8080 --link databaseserver:webserver webserver_image:version01
+```
 
-dann durch "-v html:/var/www/html"
-docker run -d --name webserver -v
+Parameter Erklärung:
+-v [VOLUME]:[VM_DIRECOTRY]
 
-so kann container gelöscht werden und das laufwerk wird beim nächsten container wieder gemountet
-
+Nun kann der Container auch komplett gelöscht werden und das Laufwerk beim nächsten Container mit den Daten vom vorherigen Container mounten.
 
 ### Kennt die Docker spezifischen Befehle
+
 #### Allgemeine Dockerbefehle
 
 | Befehl | Funktion |
@@ -306,38 +313,44 @@ so kann container gelöscht werden und das laufwerk wird beim nächsten containe
                                                                                               
 ### Testfälle
 
-Testfall 1: Wurde Docker installiert & ist die Software funktionstüchtig
-
-Ein einfacher Testfall wurde dokcer installiert?
+Testfall 1: 
+Wurde Docker installiert & ist die Software ?
 ```
 docker --version
+docker help
 ```
 
-Testfall 2: Funktionieren die einfachen Dockerbefehle
+Testfall 2: 
+Funktionieren die einfachen Dockerbefehle wie Pull/Run/etc
 ```
-simple docker commands
+docker pull 7.4.0alpha2-apache-stretch
+docker run 7.4.0alpha2-apache-stretch
 ```
 
-werden die docker container gestartet? laufen sie? oder ---
+Testfall 3:
+Werden die Docker-Container gestartet? Laufen sie weiter? Oder werden sie direkt wieder beendet?
 ```
 docker ps
 docker ps -a
 ```
 
-Testfall 3: wird das Dockerfile gefunden?
+Testfall 4: 
+Funktioniert ein Build mit dem Dockerfile?
 ```
 docker run this
 ```
 
-
-docker volume erstellt
+Testfall 5:
+Wurde das Docker Volume erstellt?
+```
 docker volume ls
+```
 
-Testfall 4: Funktioniert bei meinem eigenen Projekt die Portweiterleitung vom Container bis nach aussen zum Host-Betriebssystem der Vagrant-VM?
-
+Testfall 6:
+Funktioniert bei meinem eigenen Projekt die Portweiterleitung vom Container bis nach aussen zum Host-Betriebssystem der Vagrant-VM?
+```
 Browser öffnen --> http://localhost:8080 eingeben
-
-
+```
 
 ## Sicherheitsaspekte sind implementiert <a name="k4"></a>
 
@@ -353,7 +366,7 @@ https://stackoverflow.com/questions/46099874/how-can-i-forward-a-port-from-one-d
 
 ### Aktive Benachrichtigung ist eingerichtet
 
-### Drei Aspekte der Container
+### Drei Aspekte der Container-Absicherung
 
 
 
@@ -385,3 +398,39 @@ Hängt man keinen Tag mit dem Doppelpunkt an wird ":latest" hinzugefügt.
 
 Am Ende muss der Pfad zum Dockerfile angegeben werden. In diesem Falle befindet sich das Dockerfile im momentanen Working-Directory, da der Pfad einfach als "." angegeben wird.
 
+### Elemente aus Kubernetesübung sind dokumentiert
+
+Ich habe die Kubernetes-Übung zusammen mit Herrn Flaschberger gemacht (1 Master (Notebook von Herrn Flaschberger) - 1 Worker (Mein Notebook))
+
+Ins Lernkube Repository wechseln:
+```
+cd m300-davethebrave/lernkube/
+```
+
+Wichtig: Vor starten der Vagrant-VM im File config.yaml folgende Werte einfügen/ändern:
+![config.yaml](/images/Screenshot_14.png)
+
+1 & 2) Je nachdem ob man Master- oder Worker-Node aufsetzt muss man bei Count eine 1 oder eine 0 machen. In meinem Falle habe ich nun einen Woker-Node aufgesetzt.
+
+3 & 4) Wir haben die Aufgabe über das interne TBZ-Netzwerk erledigt. Deshalb wollten wir ein Public-Network (Siehe Nummer 4) über DHCP (Siehe Nummer 3) konfiguriert haben.
+
+Danach die Vagrant-VM starten
+```
+vagrant up
+```
+
+Sobald die Vagrant-VM läuft muss man den Token vom Master-Node bekommen um als Worker in den Cluster aufgenommen zu werden.
+Beispieltoken:
+```
+sudo kubeadm join 172.16.17.137:6443 --token jlc9q0.o1zo4ifh4z4wkvxz --discovery-token-ca-cert-hash sha256:d35f574387d0dca1e6d5980cbade9a258f97af3a2f9a9d6a8f65eeca688209cd
+```
+
+Nun kann man auf dem Master mit dem Command alle Worker-Nodes und auch den eigenen Node überwachen:
+```
+kubectl get pots -d
+```
+
+Auf dem Worker-Node selber funktionieren nur die Docker-Befehle:
+```
+docker ps (-a)
+```
