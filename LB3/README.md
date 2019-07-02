@@ -358,11 +358,40 @@ Browser öffnen --> http://localhost:8080 eingeben
 - [x] Projekt mit Git & Markdown dokumentiert
 
 ### Service-Überwachung ist eingerichtet
-https://github.com/mc-b/M300/tree/master/35-Sicherheit
 
-https://stackoverflow.com/questions/46099874/how-can-i-forward-a-port-from-one-docker-container-to-another
+#### Standard-Logging
+Es gibt von Docker das Standard-Logging und einen Syslog, welcher jedoch eingestellt werden muss.
 
+Das Standard-Logging habe ich mit folgendem Befehl getestet:
+```
+docker run --name webserver webserver_image:version01 bash -c 'echo "stdout"; echo "stderr" >>2'
+```
 
+Danach können die Logs vom zuvor gestarteten Container mit diesem Befehl ausgelesen werden.
+```
+docker logs webserver
+```
+
+Die Ausgabe des Logfiles ist in diesem Falle lediglich "stdout", da der Container nach dem Bash-Befehl direkt wieder beendet wurde. Da der Container auch nicht im Detached-Mode gestartet wurde muss man eigentlich gar nicht in die Logs schauen um "stdout" zu sehen. Denn dies macht eigentlich mehr sinn bei einem Container der detached gestarted wurde und grössere Prozesse am laufen hat.
+```
+docker run -d --name webserver webserver_image:version01 bash -c 'while true; do echo "tick"; sleep 1; done;'
+```
+
+Danach kann man die Logs nochmals mit dem Befehl "docker logs [CONTAINER_NAME]" überprüfen.
+
+#### Syslog
+
+Damit der Syslog für das Logging eines Containers aktiviert ist muss beim Starten des Containers der Parameter --log-driver=syslog gesetzt werden.
+
+Beispiel:
+```
+docker run -d --log-driver=syslog webserver_image:version01 bash -c 'i=0; while true; do i=$((i+1)); echo "docker $i"; sleep 1; done;'
+```
+
+Wenn der Command erfolgreich ausgeführt wurde kann man die Prozesse im File /var/log/syslog überwachen.
+```
+tail -f /var/log/syslog
+```
 
 ### Aktive Benachrichtigung ist eingerichtet
 
