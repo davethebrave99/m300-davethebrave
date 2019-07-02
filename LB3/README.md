@@ -437,7 +437,7 @@ cd m300-davethebrave/lernkube/
 ```
 
 Wichtig: Vor starten der Vagrant-VM im File config.yaml folgende Werte einfügen/ändern:
-![config.yaml](/images/Screenshot_14.png)
+![config.yaml](./images/Screenshot_14.png)
 
 1 & 2) Je nachdem ob man Master- oder Worker-Node aufsetzt muss man bei Count eine 1 oder eine 0 machen. In meinem Falle habe ich nun einen Woker-Node aufgesetzt.
 
