@@ -395,9 +395,38 @@ tail -f /var/log/syslog
 
 ### Aktive Benachrichtigung ist eingerichtet
 
+Es gibt für Docker verschiedene Monitoring-Lösungen. Eine Davon heisst C-Advisor (Container Advisor). Da diese Applikation auch als Docker-Container vorhanden ist kann man C-Advisor mit Docker starten.
+
+C-Advisor mit Docker starten:
+```
+docker run -d --name cadvisor -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro -p 8080:8080 google/cadvisor:latest
+```
+
+Nach dem Hochfahren des Containers kann man das Web-GUI im Browser über http://localhost:8080 erreichen.
+
 ### Drei Aspekte der Container-Absicherung
 
+Es gibt beim Betreiben von Containern verschiedene Punkte, welche man beachten kann um die Sicherheit zu verbessern.
 
+#### Nr 1. Memory begrenzen
+
+Wenn ein Container unbegrenzt RAM zur Verfügung hat kann ein DoS-Angriff sehr schnell die ganze Infrastruktur lahmlegen. Deshalb ist es von Vorteil den Arbeitsspeicher zu begrenzen.
+
+Beim Starten des Containers den Parameter "-m" und "--memory-swap" verwenden:
+```
+docker run -m 256m --memory-swap 128m webserver:version01
+```
+
+#### Nr 2. CPU-Einsätz eingrenzen
+
+#### Nr 3. Anzahl Neustarts beschränken
+
+#### Nr 4. Container Speicherplatz vorgeben
+
+Damit ein Container durch seine Applikation, welche möglicherweise durch Logs oder anderweitig und unnötig Daten generiert, nicht zu viel Ressourcen verbraucht kann man dessen Speicherkapazität begrenzen.
+```
+docker run --vm-bytes 500m webserver:version01
+```
 
 ## Zusätzliche Bewertungspunkte (Allgemein) <a name="k5"></a>
 
