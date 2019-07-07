@@ -225,16 +225,6 @@ docker run -d --name databaseserver databaseserver_image:version01
 docker run -d --name webserver -p 80:8080 --link databaseserver:webserver webserver_image:version01
 ```
 
-#### Ergänzungen zum MySQL-Image (Weitere Umgebungsvariablen)
-
-In der Übung wo Docker-Container kombiniert 
-
-#### Commands durch Dockerfile ausführen (MySQL-Client auf Webserver )
-
-#### cgi script einrichten
-
-#### Volle automation durch bash script
-
 ### Volumes zur persistenten Datenablage eingerichtet
 
 Es gibt bei Docker verschiedene Arten Volumes zur dauerhaften Ablage von Daten zu erstellen.
@@ -337,7 +327,7 @@ docker ps -a
 Testfall 4: 
 Funktioniert ein Build mit dem Dockerfile?
 ```
-docker run this
+docker run webserver_image:version01
 ```
 
 Testfall 5:
@@ -414,12 +404,24 @@ Wenn ein Container unbegrenzt RAM zur Verfügung hat kann ein DoS-Angriff sehr s
 
 Beim Starten des Containers den Parameter "-m" und "--memory-swap" verwenden:
 ```
-docker run -m 256m --memory-swap 128m webserver:version01
+docker run -m 256m --memory-swap 128m webserver_image:version01
 ```
 
 #### Nr 2. CPU-Einsätz eingrenzen
 
+Man sollte generell dort CPU sparen wo es möglich ist. Tut man dies ist man nämlich auch unter anderem vor DoS-Angriffen mehr gesichert.
+
+Der verfügbare CPU wird bei Docker durch einen relativen Wert bestimmt - wobei der Standard 1024 ist. Möchte man also einem Container den doppelten CPU zuteilen. den er standardmässig bekommt, so gibt man das mit "-c 2048" an.
+```
+docker run -d --name webserver -c 2048 webserver_image:version01
+```
+
 #### Nr 3. Anzahl Neustarts beschränken
+
+Wurde ein Container mit dem Flag --restart=always gestartet, kann dies bei einem Software-Fehler sehr viel Leistung kosten. Zudem kann auch das für einen DoS-Angriff genutzt werden. Deshalb ist es besser die Anzahl der Neustarts zu begrenzen.
+```
+docker run -d --restart=on-failure:10 my-flaky-image
+```
 
 #### Nr 4. Container Speicherplatz vorgeben
 
@@ -430,13 +432,18 @@ docker run --vm-bytes 500m webserver:version01
 
 ## Zusätzliche Bewertungspunkte (Allgemein) <a name="k5"></a>
 
-### Übungsdokumentation als Vorlage für Modul-Unterlagen erstellt
-
 ### Vergleich Vorwissen - Wissenszuwachs
+
+Ich habe vor diesem Modul nur von Containern gehört (Betrieb, Unterricht etc.), jedoch noch nie mit der Technologie gearbeitet. Dieses Modul hat mir dafür eine gute Möglichkeit geboten.
+
+Ich kenne nun die Dockerbefehle und weiss, wie man Docker-Container erstellt. Ich weiss, wie man eigene Docker-Images mithilfe eines Dockerfiles erstellt.
+Zudem weiss ich nun was Kubernetes ist und wie es grundsätzlich funktioniert.
 
 ### Reflexion
 
+Ich kam bei der Arbeit an der LB3 mässig gut voran, speziell am Anfang bin ich auf viele Probleme gestossen. Jedoch konnte ich durch das eigeneständige Lösen dieser Probleme auch viel Wissen dazugewinnen.
 
+Ich hätte mich gerne länger mit Container, Docker & Kubernetes befasst und hoffe für die zukünftigen Informatik-Lernenden, dass noch mehr Module zu diesem Thema eingeführt werden
 
 ## Zusätzliche, systemtechnische Bewertungspunkte <a name="k6"></a>
 
